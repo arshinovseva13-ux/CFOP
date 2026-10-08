@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CFOP — алгоритмы на 3D-кубике</title>
+<style>
+:root{--bg:#f6f5f1;--fg:#1d1d1b;--card:#fff;--ac:#2563eb;--mu:#6b6b66;--bd:#ddd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171a;--fg:#eee;--card:#222226;--ac:#6ea0ff;--mu:#9a9aa3;--bd:#38383f}}
+:root[data-theme="dark"]{--bg:#17171a;--fg:#eee;--card:#222226;--ac:#6ea0ff;--mu:#9a9aa3;--bd:#38383f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px system-ui,sans-serif}
+main{max-width:480px;margin:0 auto;padding:12px}
+h1{font-size:18px;margin:4px 0 10px}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 12px}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.tabs button{flex:1}
+#chips{display:flex;flex-wrap:wrap;gap:5px;max-height:104px;overflow-y:auto;margin-bottom:10px}
+#chips button{padding:5px 9px;font-size:13px;border-radius:14px}
+#cv{width:100%;aspect-ratio:1;max-height:360px;background:var(--card);border:1px solid var(--bd);border-radius:14px;touch-action:none;display:block}
+#cv canvas{width:100%!important;height:100%!important;display:block}
+.hint{color:var(--mu);font-size:12px;text-align:center;margin:4px 0}
+#title{font-weight:600;margin:6px 0}
+#alg{font:600 18px ui-monospace,monospace;line-height:1.9;word-spacing:2px}
+#alg span{padding:2px 5px;border-radius:6px;margin-right:2px}
+#alg .d{color:var(--mu)}#alg .c{background:var(--ac);color:#fff}
+#info{min-height:40px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:8px 0}
+.ctl{display:flex;gap:6px}.ctl button{flex:1;font-size:18px}
+[hidden]{display:none!important}#pad{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:6px 0}#pad button{padding:9px 0;font:600 15px ui-monospace,monospace}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:8px 0;line-height:1.5}.card b.big{font-size:22px}.bar{height:8px;background:var(--bd);border-radius:4px;margin:4px 0 8px}.bar i{display:block;height:100%;background:var(--ac);border-radius:4px}
+select{font:inherit;background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:10px;padding:8px}
+</style></head><body><main>
+<h1>CFOP: алгоритмы на 3D-кубике</h1>
+<div class="tabs"><button id="mA" class="on">Алгоритмы</button><button id="mP">Практика</button></div>
+<div id="At"><div class="tabs" id="tabs"></div>
+<div id="chips"></div></div>
+<div id="cv"></div>
+<div class="hint">Крутите куб пальцем. Жёлтый сверху, зелёный спереди.</div>
+<div id="Ab"><div id="title"></div>
+<div id="alg"></div>
+<div id="info">Выберите алгоритм</div>
+<div class="ctl">
+<button id="bR">⏮</button><button id="bB">◀</button><button id="bP">▶</button><button id="bF">▶|</button>
+<select id="sp"><option value="0.6">0.6×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+</div></div>
+<div id="Pz" hidden><div class="ctl" style="margin:8px 0"><button id="pS">🔀 Перемешать</button><button id="pC">✅ Проверить</button></div><div class="hint" id="pn">Нажмите «Перемешать», затем собирайте методом CFOP</div><div id="pad"></div><div id="res"></div><details class="card" open><summary><b>Справка: что значит каждая буква</b></summary>
+<div style="margin-top:6px"><b>Грани</b> (крутим на 90° по часовой, если смотреть на эту грань):<br>
+<b>R</b> — правая · <b>L</b> — левая · <b>U</b> — верхняя (жёлтая) · <b>D</b> — нижняя (белая) · <b>F</b> — передняя (зелёная) · <b>B</b> — задняя (синяя)<br><br>
+<b>Знаки после буквы:</b><br>
+<b>'</b> (штрих, например R') — в обратную сторону, против часовой<br>
+<b>2</b> (например R2) — поворот на 180°<br><br>
+<b>Маленькие буквы</b> (r u f l d b) — широкие ходы: крутятся сразу два слоя, грань и средний слой рядом с ней.<br><br>
+<b>Срезы</b> — средние слои:<br>
+<b>M</b> — между L и R, направление как у L<br>
+<b>E</b> — между U и D, направление как у D<br>
+<b>S</b> — между F и B, направление как у F<br><br>
+<b>Повороты всего куба</b> (в записях алгоритмов): <b>x</b> — как R, <b>y</b> — как U, <b>z</b> — как F. В кнопках их нет: я перевожу их в обычные ходы.<br><br>
+<b>Этапы CFOP:</b> <b>C</b> (Cross) — крест на белой грани; <b>F2L</b> — первые два слоя (пары угол+ребро); <b>OLL</b> — сделать верхнюю грань жёлтой; <b>PLL</b> — расставить последний слой по местам.
+</div></details></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const OLLS=["1 R U2 R2 F R F' U2 R' F R F'", "2 r U r' U2 R U2 R' U2 r U' r'", "3 r' R2 U R' U r U2 r' U M'", "4 M U' r U2 r' U' R U' R' M'", "5 l' U2 L U L' U l", "6 r U2 R' U' R U' r'", "7 r U R' U R U2 r'", "8 l' U' L U' L' U2 l", "9 R U R' U' R' F R2 U R' U' F'", "10 R U R' U R' F R F' R U2 R'", "11 r U R' U R' F R F' R U2 r'", "12 M' R' U' R U' R' U2 R U' M", "13 F U R U' R2 F' R U R U' R'", "14 R' F R U R' F' R F U' F'", "15 l' U' l L' U' L U l' U l", "16 r U r' R U R' U' r U' r'", "17 R U R' U R' F R F' U2 R' F R F'", "18 r U R' U R U2 r2 U' R U' R' U2 r", "19 r' R U R U R' U' M' R' F R F'", "20 r U R' U' M2 U R U' R' U' M'", "21 R U2 R' U' R U R' U' R U' R'", "22 R U2 R2 U' R2 U' R2 U2 R", "23 R2 D R' U2 R D' R' U2 R'", "24 r U R' U' r' F R F'", "25 R' F R U R' U' F' U R", "26 R U2 R' U' R U' R'", "27 R U R' U R U2 R'", "28 r U R' U' M U R U' R'", "29 R U R' U' R U' R' F' U' F R U R'", "30 F R' F R2 U' R' U' R U R' F2", "31 R' U' F U R U' R' F' R", "32 L U F' U' L' U L F L'", "33 R U R' U' R' F R F'", "34 R U R2 U' R' F R U R U' F'", "35 R U2 R2 F R F' R U2 R'", "36 R' U' R U' R' U R U R B' R' B", "37 F R' F' R U R U' R'", "38 R U R' U R U' R' U' R' F R F'", "39 L F' L' U' L U F U' L'", "40 R' F R U R' U' F' U R", "41 R U R' U R U2 R' F R U R' U' F'", "42 R' U' R U' R' U2 R F R U R' U' F'", "43 R' U' F' U F R", "44 F U R U' R' F'", "45 F R U R' U' F'", "46 R' U' R' F R F' U R", "47 R' U' R' F R F' R' F R F' U R", "48 F R U R' U' R U R' U' F'", "49 R B' R2 F R2 B R2 F' R", "50 R' F R2 B' R2 F' R2 B R'", "51 F U R U' R' U R U' R' F'", "52 R U R' U R U' B U' B' R'", "53 l' U2 L U L' U' L U L' U l", "54 r U2 R' U' R U R' U' R U' r'", "55 R U2 R2 U' R U' R' U2 F R F'", "56 r U r' U R U' R' U R U' R' r U' r'", "57 R U R' U' M' U R U' r'"];
+const F2B=["U R U' R'", "y' R' U' R", "y' U' R' U R", "R U R'", "U' R U R' U2 R U' R'", "U' R U2 R' U2 R U' R'", "y' U R' U' R U2 R' U R", "y' U R' U2 R U2 R' U R", "y' U R' U' R U' R' U' R", "U' R U2 R' y' U R' U' R", "y' U R' U R U' R' U' R", "U' R U R' U R U R'", "y' U R' U2 R d' R U R'", "U' R U' R' U R U R'", "y' R' U R U' y U' R U R'", "R U2 R' U' R U R'", "R U' R' U d R' U' R", "y' R' U2 R U R' U' R", "U R U2 R' U R U' R'", "U2 R U R' U R U' R'", "y' U' R' U2 R U' R' U R", "y' U2 R' U' R U' R' U R", "R U R' U2 R U R' U' R U R'", "y' R' U' R U2 R' U' R U R' U' R", "y U' L' U L d R U' R'", "R U' R' U R U' R'", "y' R' U' R U R' U' R", "U R U' R' F R' F' R", "y' R' U R U' R' U R", "R U R' U' R U R'", "R U' R' y' R' U2 R", "U' R U' R' U2 R U' R'", "U' R U R' d R' U' R", "R U R' U' R U R' U' R U R'", "U' R U2 R' U R U R'", "y' U R' U' R d' R U R'", "R U' R' U' R U R' U2 R U' R'", "R U' R' U y' R' U' R U' R' U' R", "R U' R' d R' U2 R U2 R' U R", "R U' R' U R U2 R' U R U' R'", "R U' R' U d R' U' R U' R' U R"];
+const D={"F2L":[],"OLL":OLLS.map(l=>{const i=l.indexOf(" ");return"OLL "+l.slice(0,i)+"|"+l.slice(i+1)}),"PLL":[
+"Aa|R' F R' B2 R F' R' B2 R2","Ab|R B' R F2 R' B R F2 R2","E|R B' R' F R B R' F' R B R' F R B' R' F'",
+"F|R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R","Ga|R2 U R' U R' U' R U' R2 D U' R' U R D'","Gb|R' U' R U D' R2 U R' U R U' R U' R2 D",
+"Gc|R2 U' R U' R U R' U R2 D' U R U' R' D","Gd|R U R' U' D R2 U' R U' R' U R' U R2 D'","H|M2 U M2 U2 M2 U M2",
+"Ja|R' U L' U2 R U' R' U2 R L","Jb|R U R' F' R U R' U' R' F R2 U' R'",
+"Na|R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'","Nb|R' U R U' R' F' U' F R U R' F R' F' R U' R",
+"Ra|R U' R' U' R U R D R' U' R D' R' U2 R'","Rb|R' U2 R U2 R' F R U R' U' R' F' R2","T|R U R' U' R' F R2 U' R' U' R U R' F'",
+"Ua|R U' R U R U R U' R' U' R2","Ub|R2 U R U R' U' R' U' R' U R'","V|R' U R' U' R D' R' D R' U D' R2 U' R2 D R2",
+"Y|F R U' R' U' R U R' F' R U R' U' R' F R F'","Z|M' U M2 U M2 U M' U2 M2"]};
+const NM={R:'Правая грань',L:'Левая грань',U:'Верхняя грань',D:'Нижняя грань',F:'Передняя грань',B:'Задняя грань',r:'Две правых слоя',l:'Две левых слоя',u:'Два верхних слоя',d:'Два нижних слоя',f:'Два передних слоя',b:'Два задних слоя',M:'Средний слой (по направлению L)',E:'Экватор (по направлению D)',S:'Стоячий слой (по направлению F)'};
+const eq=n=>v=>v==n,ge=v=>v>=0,le=v=>v<=0,all=()=>true,P=Math.PI;
+const MV={R:['x',eq(1),-1],L:['x',eq(-1),1],U:['y',eq(1),-1],D:['y',eq(-1),1],F:['z',eq(1),-1],B:['z',eq(-1),1],
+r:['x',ge,-1],l:['x',le,1],u:['y',ge,-1],d:['y',le,1],f:['z',ge,-1],b:['z',le,1],M:['x',eq(0),1],E:['y',eq(0),1],S:['z',eq(0),-1]};
+const W=document.getElementById('cv');
+const ren=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));W.appendChild(ren.domElement);
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,1,.1,50);cam.position.set(0,0,11);
+const root=new THREE.Group();root.rotation.set(.5,-.7,0);sc.add(root);
+function fit(){const s=W.clientWidth,h=W.clientHeight||s;ren.setSize(s,h);cam.aspect=s/h;cam.updateProjectionMatrix()}
+addEventListener('resize',fit);fit();
+const COL={x1:'#ff8c1a',x_1:'#d62d20',y1:'#ffd500',y_1:'#f4f4f4',z1:'#009b48',z_1:'#0057b8'};
+const cubies=[],boxG=new THREE.BoxGeometry(.96,.96,.96),boxM=new THREE.MeshBasicMaterial({color:'#111'}),plG=new THREE.PlaneGeometry(.84,.84);
+const plM={};for(const k in COL)plM[k]=new THREE.MeshBasicMaterial({color:COL[k]});
+function build(){cubies.forEach(c=>root.remove(c));cubies.length=0;
+for(let x=-1;x<2;x++)for(let y=-1;y<2;y++)for(let z=-1;z<2;z++){
+const g=new THREE.Group();g.add(new THREE.Mesh(boxG,boxM));g.position.set(x,y,z);
+const add=(ax,v)=>{if(v!=1&&v!=-1)return;const m=new THREE.Mesh(plG,plM[ax+(v<0?'_1':'1')]);
+if(ax=='x'){m.rotation.y=v*P/2;m.position.x=v*.482}else if(ax=='y'){m.rotation.x=-v*P/2;m.position.y=v*.482}else{if(v<0)m.rotation.y=P;m.position.z=v*.482}g.add(m)};
+add('x',x);add('y',y);add('z',z);root.add(g);cubies.push(g)}}
+let speed=1;
+function mv(t,anim){const m=t.match(/^([A-Za-z])(2|')?$/),d=MV[m[1]],k=m[2]=='2'?2:m[2]=="'"?-1:1,ang=d[2]*k*P/2;
+const sel=cubies.filter(c=>d[1](Math.round(c.position[d[0]]))),p=new THREE.Group();root.add(p);sel.forEach(c=>p.attach(c));
+const fin=()=>{p.rotation[d[0]]=ang;p.updateMatrixWorld(true);sel.forEach(c=>{root.attach(c);c.position.set(Math.round(c.position.x),Math.round(c.position.y),Math.round(c.position.z))});root.remove(p)};
+if(!anim){fin();return Promise.resolve()}
+return new Promise(res=>{const T=(k==2?560:380)/speed,t0=performance.now();(function f(n){const u=Math.min(1,(n-t0)/T);p.rotation[d[0]]=ang*(u<.5?2*u*u:1-2*(1-u)*(1-u));if(u<1)requestAnimationFrame(f);else{fin();res()}})(t0)})}
+const mirT=t=>{const m={R:'L',L:'R',r:'l',l:'r'},b=m[t[0]]||t[0],k=t.slice(1);return b+(k=='2'?'2':k=="'"?'':"'")};
+const mir=a=>a.split(' ').map(mirT).join(' ');
+D.F2L=F2B.map((a,i)=>'F2L '+(i+1)+'|'+a);
+const TY={F:'R',R:'B',B:'L',L:'F',f:'r',r:'b',b:'l',l:'f'};
+const ym=(t,k)=>{let c=t[0];for(let i=0;i<k;i++)c=TY[c]||c;return c+t.slice(1)};
+function expand(a){let k=0,o=[];a.split(/\s+/).flatMap(t=>t=='d'?["y'",'U']:t=="d'"?["U'",'y']:[t]).forEach(t=>{if(t[0]=='y'){k=(k+(t=='y'?1:t=="y'"?3:2))%4}else o.push(ym(t,k))});return o}
+const inv=t=>t.endsWith('2')?t:t.endsWith("'")?t.slice(0,-1):t+"'";
+function desc(t){const k=t.slice(1),b=t[0];const dir=k=='2'?'на 180°':k=="'"?'против часовой':'по часовой';
+return `<b>${t}</b> — ${NM[b]}, ${dir}${k=='2'?'':' (если смотреть на эту грань)'}`}
+let toks=[],idx=0,playing=false,busy=false,run=0;
+const $=id=>document.getElementById(id);
+function paint(cur){$('alg').innerHTML=toks.map((t,i)=>`<span class="${i==cur?'c':i<idx?'d':''}">${t}</span>`).join(' ')}
+function load(name,alg){playing=false;run++;busy=false;toks=expand(alg);build();toks.slice().reverse().forEach(t=>mv(inv(t),false));idx=0;
+$('title').textContent=name+(toks.join(' ')!=alg?' — '+alg+' (на кубике показано с учётом поворотов)':'');$('info').textContent='Нажмите ▶ — куб покажет, какие слои крутить';$('bP').textContent='▶';paint(-1)}
+async function step(){if(idx>=toks.length||busy)return;busy=true;const my=run,t=toks[idx];paint(idx);$('info').innerHTML=desc(t);await mv(t,true);if(my!=run)return;idx++;busy=false;paint(-1);if(idx>=toks.length)$('info').textContent='Готово! Куб собран.'}
+async function back(){if(idx<1||busy)return;playing=false;$('bP').textContent='▶';busy=true;const my=run;idx--;paint(-1);$('info').innerHTML='Откат: '+desc(inv(toks[idx]));await mv(inv(toks[idx]),true);if(my!=run)return;busy=false}
+async function play(){if(!toks.length)return;if(playing){playing=false;$('bP').textContent='▶';return}
+if(idx>=toks.length){const c=cur;load(c[0],c[1])}
+playing=true;$('bP').textContent='⏸';const my=run;
+while(playing&&my==run&&idx<toks.length){await step();await new Promise(r=>setTimeout(r,180/speed))}
+if(my==run){playing=false;$('bP').textContent='▶'}}
+let cur=null,tab=Object.keys(D)[0];
+function chips(){$('chips').innerHTML='';D[tab].forEach(s=>{const[n,a]=s.split('|'),b=document.createElement('button');b.textContent=n;
+b.onclick=()=>{[...$('chips').children].forEach(x=>x.classList.remove('on'));b.classList.add('on');cur=[n,a];load(n,a)};$('chips').appendChild(b)})}
+Object.keys(D).forEach(k=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>{tab=k;[...$('tabs').children].forEach(x=>x.classList.toggle('on',x==b));chips()};if(k==tab)b.classList.add('on');$('tabs').appendChild(b)});
+chips();$('chips').children[0].click();
+$('bP').onclick=play;$('bF').onclick=()=>{playing=false;$('bP').textContent='▶';step()};$('bB').onclick=back;
+$('bR').onclick=()=>{if(cur)load(cur[0],cur[1])};$('sp').onchange=e=>speed=+e.target.value;
+
+const hasT=(h,n)=>(' '+h+' ').includes(' '+n+' ');
+function norm(a){const o=[];a.forEach(t=>{const l=t[0],q=t[1]=='2'?2:t[1]=="'"?3:1,p=o[o.length-1];if(p&&p[0]==l){p[1]=(p[1]+q)%4;if(!p[1])o.pop()}else o.push([l,q])});return o.map(([l,q])=>l+['','',"2","'"][q])}
+function an(S){const C={R:S['1,0,0,1,0,0'],L:S['-1,0,0,-1,0,0'],U:S['0,1,0,0,1,0'],D:S['0,-1,0,0,-1,0'],F:S['0,0,1,0,0,1'],B:S['0,0,-1,0,0,-1']},NK={'1,0,0':'R','-1,0,0':'L','0,1,0':'U','0,-1,0':'D','0,0,1':'F','0,0,-1':'B'};
+const sx=x=>x>0?C.R:C.L,sz=z=>z>0?C.F:C.B;
+const cr=[[1,0],[-1,0],[0,1],[0,-1]].every(([x,z])=>S[`${x},-1,${z},0,-1,0`]==C.D&&(x?S[`${x},-1,0,${x},0,0`]==sx(x):S[`0,-1,${z},0,0,${z}`]==sz(z)));
+let p=0;[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([x,z])=>{if(S[`${x},-1,${z},0,-1,0`]==C.D&&S[`${x},-1,${z},${x},0,0`]==sx(x)&&S[`${x},-1,${z},0,0,${z}`]==sz(z)&&S[`${x},0,${z},${x},0,0`]==sx(x)&&S[`${x},0,${z},0,0,${z}`]==sz(z))p++});
+let o=true;for(let x=-1;x<2;x++)for(let z=-1;z<2;z++)if(S[`${x},1,${z},0,1,0`]!=C.U)o=false;
+const so=Object.keys(S).every(k=>S[k]==C[NK[k.split(',').slice(3).join(',')]]);
+return{c:cr,p,o,s:so}}
+function st(){const M={};cubies.forEach(g=>{const p=g.position;g.children.slice(1).forEach(m=>{const n=new THREE.Vector3(0,0,1).applyQuaternion(m.quaternion).applyQuaternion(g.quaternion);M[[p.x,p.y,p.z,Math.round(n.x),Math.round(n.y),Math.round(n.z)]]=m.material.color.getHexString()})});return M}
+function ident(seg,db){const h=norm(seg).join(' '),f=[];db.forEach(e=>{const[n,a]=e.split('|'),t=expand(a);for(let k=0;k<4;k++){if(hasT(h,t.map(x=>ym(x,k)).join(' '))){f.push(n);break}}});return f}
+let hist=[],scr=[],q=Promise.resolve(),mode='alg',fin=false;
+const PG=[['R','U','F','L','D','B'],['r','u','f','l','d','b'],['M','E','S']];
+PG.forEach(g=>{g.concat(g.map(x=>x+"'")).forEach(t=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>pm(t);$('pad').appendChild(b)})});
+function pm(t){if(!scr.length||fin)return;hist.push(t);$('pn').textContent='Ходов: '+hist.length;q=q.then(()=>mv(t,true)).then(()=>{if(!fin&&an(st()).s)an2()})}
+function scramble(){run++;playing=false;q=Promise.resolve();fin=false;hist=[];scr=[];build();let l='';while(scr.length<22){const f='RLUDFB'[Math.random()*6|0];if(f==l)continue;l=f;scr.push(f+['',"'",'2'][Math.random()*3|0])}scr.forEach(t=>mv(t,false));$('res').innerHTML='';$('pn').textContent='Ход: 0. Крутите кнопками ниже.'}
+function setMode(m){mode=m;run++;playing=false;$('mA').classList.toggle('on',m=='alg');$('mP').classList.toggle('on',m=='pr');['At','Ab'].forEach(i=>$(i).hidden=m!='alg');$('Pz').hidden=m!='pr';
+if(m=='pr'){speed=3;scramble()}else{speed=+$('sp').value;if(cur)load(cur[0],cur[1])}}
+async function an2(){await q;fin=true;build();scr.forEach(t=>mv(t,false));let iC=0,iF=0,iO=0,iS=0,pm_=0;
+hist.forEach((t,i)=>{mv(t,false);const a=an(st());pm_=Math.max(pm_,a.p);if(!iC&&a.c)iC=i+1;if(iC&&!iF&&a.c&&a.p==4)iF=i+1;if(iF&&!iO&&a.o&&a.c&&a.p==4)iO=i+1;if(iO&&!iS&&a.s)iS=i+1});
+const oN=iF&&iO?ident(hist.slice(iF,iO),D.OLL.concat(D.OLL)):[],pN=iO&&iS?ident(hist.slice(iO,iS),D.PLL):[];
+const cm=iC,fm=iF?iF-iC:0,om=iO?iO-iF:0,pl=iS?iS-iO:0;
+let sc=[iC?(cm<=9?25:cm<=15?18:10):0,iF?(fm<=32?35:fm<=48?27:18):pm_*4,iO?(oN.length?20:10):0,iS?(pN.length?20:10):0];
+const T=sc.reduce((a,b)=>a+b,0),row=(n,v,m,txt)=>`<div><b>${n}</b> — ${txt} <span style="float:right">${v}/${m}</span></div><div class="bar"><i style="width:${v/m*100}%"></i></div>`;
+const v=T>=85?'Отлично! Вы уверенно владеете CFOP.':T>=60?'Хорошо: метод понятен, шлифуйте алгоритмы и экономию ходов.':T>=35?'База есть. Учите алгоритмы OLL/PLL и ищите пары F2L.':'Пока это не CFOP. Начните с креста и первых пар F2L.';
+$('res').innerHTML=`<div class="card"><b class="big">${T}/100</b> ${iS?'Куб собран':'Куб не собран'}, ходов: ${hist.length}<br>${v}</div><div class="card">`+
+row('Крест',sc[0],25,iC?cm+' ходов (идеал ≤ 8)':'не собран')+
+row('F2L',sc[1],35,iF?fm+' ходов (хорошо ≤ 32)':'пар собрано: '+pm_+' из 4')+
+row('OLL',sc[2],20,iO?om+' ходов; '+(oN.length?'распознан: '+oN.join(', '):'алгоритм из базы не найден — возможно 2-look или своя вариация'):'не достигнут')+
+row('PLL',sc[3],20,iS?pl+' ходов; '+(pN.length?'распознан: '+pN.join(', '):'алгоритм из базы не найден'):'не достигнут')+'</div>'}
+$('mA').onclick=()=>setMode('alg');$('mP').onclick=()=>setMode('pr');$('pS').onclick=scramble;$('pC').onclick=()=>{if(scr.length&&!fin&&hist.length)an2()};
+let dr=null;ren.domElement.onpointerdown=e=>{dr=[e.clientX,e.clientY];ren.domElement.setPointerCapture(e.pointerId)};
+ren.domElement.onpointermove=e=>{if(!dr)return;root.rotation.y+=(e.clientX-dr[0])*.01;root.rotation.x=Math.max(-1.4,Math.min(1.4,root.rotation.x+(e.clientY-dr[1])*.01));dr=[e.clientX,e.clientY]};
+ren.domElement.onpointerup=()=>dr=null;
+(function loop(){ren.render(sc,cam);requestAnimationFrame(loop)})();
+</script></body></html>
