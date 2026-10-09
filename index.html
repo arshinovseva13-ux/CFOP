@@ -14,8 +14,10 @@ h1{font-size:18px;margin:4px 0 10px}
 button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 12px}
 button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
 .tabs button{flex:1}
-#chips{display:flex;flex-wrap:wrap;gap:5px;max-height:104px;overflow-y:auto;margin-bottom:10px}
-#chips button{padding:5px 9px;font-size:13px;border-radius:14px}
+#chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px;max-height:300px;overflow-y:auto;margin-bottom:10px}
+#chips .cs{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 3px;font-size:12px;border-radius:10px}
+.cs small{color:var(--mu);font-size:10px;text-align:center;line-height:1.1}.cs.on small{color:#fff}.cs svg{background:#1b1b1f;border-radius:6px}
+#tabs{flex-wrap:wrap}#tabs button{flex:1 1 30%}
 #cv{width:100%;aspect-ratio:1;max-height:360px;background:var(--card);border:1px solid var(--bd);border-radius:14px;touch-action:none;display:block}
 #cv canvas{width:100%!important;height:100%!important;display:block}
 .hint{color:var(--mu);font-size:12px;text-align:center;margin:4px 0}
@@ -25,22 +27,24 @@ button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
 #alg .d{color:var(--mu)}#alg .c{background:var(--ac);color:#fff}
 #info{min-height:40px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:8px 0}
 .ctl{display:flex;gap:6px}.ctl button{flex:1;font-size:18px}
-[hidden]{display:none!important}#pad{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:6px 0}#pad button{padding:9px 0;font:600 15px ui-monospace,monospace}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:8px 0;line-height:1.5}.card b.big{font-size:22px}.bar{height:8px;background:var(--bd);border-radius:4px;margin:4px 0 8px}.bar i{display:block;height:100%;background:var(--ac);border-radius:4px}
+[hidden]{display:none!important}#pad,#pad2{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:6px 0}#pad button,#pad2 button{padding:9px 0;font:600 15px ui-monospace,monospace}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:8px 0;line-height:1.5}.card b.big{font-size:22px}.bar{height:8px;background:var(--bd);border-radius:4px;margin:4px 0 8px}.bar i{display:block;height:100%;background:var(--ac);border-radius:4px}
+.gr button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;margin:4px 0;font-size:13px}.gr svg{flex:none;background:#1b1b1f;border-radius:6px}#gd p{margin:4px 0}
 select{font:inherit;background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:10px;padding:8px}
 </style></head><body><main>
 <h1>CFOP: алгоритмы на 3D-кубике</h1>
 <div class="tabs"><button id="mA" class="on">Алгоритмы</button><button id="mP">Практика</button></div>
 <div id="At"><div class="tabs" id="tabs"></div>
-<div id="chips"></div></div>
+<div id="chips"></div><div id="gd" class="card"></div></div>
 <div id="cv"></div>
-<div class="hint">Крутите куб пальцем. Жёлтый сверху, зелёный спереди.</div>
+<div class="hint">Крутите куб пальцем. Жёлтый сверху, зелёный спереди.<br>В тренировке: проведите пальцем по грани, чтобы повернуть слой; по фону — вращение вида. На компьютере: клавиши R L U D F B M E S (Shift — против часовой).</div><div style="text-align:center"><button id="bV" style="padding:4px 10px;font-size:12px">✋ Жесты: крутить слои</button></div>
 <div id="Ab"><div id="title"></div>
 <div id="alg"></div>
 <div id="info">Выберите алгоритм</div>
 <div class="ctl">
 <button id="bR">⏮</button><button id="bB">◀</button><button id="bP">▶</button><button id="bF">▶|</button>
-<select id="sp"><option value="0.6">0.6×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
-</div></div>
+<select id="sp"><option value="0.6">0.6×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">🚀 Спидкубер</option></select>
+</div>
+<div class="ctl" style="margin-top:6px"><button id="bT">✋ Повторить сам</button><button id="bQ">🎲 Случайный случай</button><button id="bH">💡 Подсказка</button></div><div id="pad2" hidden></div></div>
 <div id="Pz" hidden><div class="ctl" style="margin:8px 0"><button id="pS">🔀 Перемешать</button><button id="pC">✅ Проверить</button></div><div class="hint" id="pn">Нажмите «Перемешать», затем собирайте методом CFOP</div><div id="pad"></div><div id="res"></div><details class="card" open><summary><b>Справка: что значит каждая буква</b></summary>
 <div style="margin-top:6px"><b>Грани</b> (крутим на 90° по часовой, если смотреть на эту грань):<br>
 <b>R</b> — правая · <b>L</b> — левая · <b>U</b> — верхняя (жёлтая) · <b>D</b> — нижняя (белая) · <b>F</b> — передняя (зелёная) · <b>B</b> — задняя (синяя)<br><br>
@@ -60,7 +64,7 @@ select{font:inherit;background:var(--card);color:var(--fg);border:1px solid var(
 <script>
 const OLLS=["1 R U2 R2 F R F' U2 R' F R F'", "2 r U r' U2 R U2 R' U2 r U' r'", "3 r' R2 U R' U r U2 r' U M'", "4 M U' r U2 r' U' R U' R' M'", "5 l' U2 L U L' U l", "6 r U2 R' U' R U' r'", "7 r U R' U R U2 r'", "8 l' U' L U' L' U2 l", "9 R U R' U' R' F R2 U R' U' F'", "10 R U R' U R' F R F' R U2 R'", "11 r U R' U R' F R F' R U2 r'", "12 M' R' U' R U' R' U2 R U' M", "13 F U R U' R2 F' R U R U' R'", "14 R' F R U R' F' R F U' F'", "15 l' U' l L' U' L U l' U l", "16 r U r' R U R' U' r U' r'", "17 R U R' U R' F R F' U2 R' F R F'", "18 r U R' U R U2 r2 U' R U' R' U2 r", "19 r' R U R U R' U' M' R' F R F'", "20 r U R' U' M2 U R U' R' U' M'", "21 R U2 R' U' R U R' U' R U' R'", "22 R U2 R2 U' R2 U' R2 U2 R", "23 R2 D R' U2 R D' R' U2 R'", "24 r U R' U' r' F R F'", "25 R' F R U R' U' F' U R", "26 R U2 R' U' R U' R'", "27 R U R' U R U2 R'", "28 r U R' U' M U R U' R'", "29 R U R' U' R U' R' F' U' F R U R'", "30 F R' F R2 U' R' U' R U R' F2", "31 R' U' F U R U' R' F' R", "32 L U F' U' L' U L F L'", "33 R U R' U' R' F R F'", "34 R U R2 U' R' F R U R U' F'", "35 R U2 R2 F R F' R U2 R'", "36 R' U' R U' R' U R U R B' R' B", "37 F R' F' R U R U' R'", "38 R U R' U R U' R' U' R' F R F'", "39 L F' L' U' L U F U' L'", "40 R' F R U R' U' F' U R", "41 R U R' U R U2 R' F R U R' U' F'", "42 R' U' R U' R' U2 R F R U R' U' F'", "43 R' U' F' U F R", "44 F U R U' R' F'", "45 F R U R' U' F'", "46 R' U' R' F R F' U R", "47 R' U' R' F R F' R' F R F' U R", "48 F R U R' U' R U R' U' F'", "49 R B' R2 F R2 B R2 F' R", "50 R' F R2 B' R2 F' R2 B R'", "51 F U R U' R' U R U' R' F'", "52 R U R' U R U' B U' B' R'", "53 l' U2 L U L' U' L U L' U l", "54 r U2 R' U' R U R' U' R U' r'", "55 R U2 R2 U' R U' R' U2 F R F'", "56 r U r' U R U' R' U R U' R' r U' r'", "57 R U R' U' M' U R U' r'"];
 const F2B=["U R U' R'", "y' R' U' R", "y' U' R' U R", "R U R'", "U' R U R' U2 R U' R'", "U' R U2 R' U2 R U' R'", "y' U R' U' R U2 R' U R", "y' U R' U2 R U2 R' U R", "y' U R' U' R U' R' U' R", "U' R U2 R' y' U R' U' R", "y' U R' U R U' R' U' R", "U' R U R' U R U R'", "y' U R' U2 R d' R U R'", "U' R U' R' U R U R'", "y' R' U R U' y U' R U R'", "R U2 R' U' R U R'", "R U' R' U d R' U' R", "y' R' U2 R U R' U' R", "U R U2 R' U R U' R'", "U2 R U R' U R U' R'", "y' U' R' U2 R U' R' U R", "y' U2 R' U' R U' R' U R", "R U R' U2 R U R' U' R U R'", "y' R' U' R U2 R' U' R U R' U' R", "y U' L' U L d R U' R'", "R U' R' U R U' R'", "y' R' U' R U R' U' R", "U R U' R' F R' F' R", "y' R' U R U' R' U R", "R U R' U' R U R'", "R U' R' y' R' U2 R", "U' R U' R' U2 R U' R'", "U' R U R' d R' U' R", "R U R' U' R U R' U' R U R'", "U' R U2 R' U R U R'", "y' U R' U' R d' R U R'", "R U' R' U' R U R' U2 R U' R'", "R U' R' U y' R' U' R U' R' U' R", "R U' R' d R' U2 R U2 R' U R", "R U' R' U R U2 R' U R U' R'", "R U' R' U d R' U' R U' R' U R"];
-const D={"F2L":[],"OLL":OLLS.map(l=>{const i=l.indexOf(" ");return"OLL "+l.slice(0,i)+"|"+l.slice(i+1)}),"PLL":[
+const D={"Крест":[],"F2L":[],"OLL":OLLS.map(l=>{const i=l.indexOf(" ");return"OLL "+l.slice(0,i)+"|"+l.slice(i+1)}),"PLL":[
 "Aa|R' F R' B2 R F' R' B2 R2","Ab|R B' R F2 R' B R F2 R2","E|R B' R' F R B R' F' R B R' F R B' R' F'",
 "F|R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R","Ga|R2 U R' U R' U' R U' R2 D U' R' U R D'","Gb|R' U' R U D' R2 U R' U R U' R U' R2 D",
 "Gc|R2 U' R U' R U R' U R2 D' U R U' R' D","Gd|R U R' U' D R2 U' R U' R' U R' U R2 D'","H|M2 U M2 U2 M2 U M2",
@@ -98,29 +102,53 @@ return new Promise(res=>{const T=(k==2?560:380)/speed,t0=performance.now();(func
 const mirT=t=>{const m={R:'L',L:'R',r:'l',l:'r'},b=m[t[0]]||t[0],k=t.slice(1);return b+(k=='2'?'2':k=="'"?'':"'")};
 const mir=a=>a.split(' ').map(mirT).join(' ');
 D.F2L=F2B.map((a,i)=>'F2L '+(i+1)+'|'+a);
+D['Комбинации']=["Пиф-паф|R U R' U'","Пиф-паф (левый)|L' U' L U","Молоток|R' F R F'","Вставка|R U' R'","Выбивание|R U R'","Двойная вставка|R U2 R'","Зайчик (Sune)|R U R' U R U2 R'","Анти-зайчик|R U2 R' U' R U' R'","Лямбда (J-перм)|R U R' F' R U R' U' R' F R2 U' R'","Рыбка|R U R' U"];
+const NICK={'OLL 21':'H · Двойной зайчик','OLL 22':'Pi','OLL 23':'U · Фары','OLL 24':'T · Хамелеон','OLL 25':'L · Бабочка','OLL 26':'Анти-зайчик','OLL 27':'Зайчик (Sune)','OLL 7':'Молния','OLL 8':'Обратная молния','OLL 10':'Anti-Kite','OLL 35':'Fish Salad','OLL 37':'Mounted Fish','OLL 47':'Anti-Breakneck','OLL 43':'Anti-P','OLL 32':'Anti-Couch','OLL 36':'Wario','OLL 54':'Anti-Frying Pan','OLL 40':'Anti-Fung','OLL 3':'Anti-Pinwheel','OLL 46':'С + фары','OLL 33':'T-форма','OLL 45':'T-форма','OLL 5':'Квадрат','OLL 6':'Квадрат','OLL 9':'Рыба','OLL 11':'Малая молния','OLL 12':'Малая молния','OLL 39':'Большая молния','OLL 13':'Конь','OLL 14':'Конь','OLL 15':'Конь','OLL 16':'Конь','OLL 31':'P-форма','OLL 44':'P-форма','OLL 34':'C-форма','OLL 38':'W-форма',
+'Aa':'3 угла по кругу','Ab':'3 угла (обратно)','Ua':'3 ребра по кругу','Ub':'3 ребра (обратно)','H':'рёбра напротив','Z':'соседние рёбра','T':'Т · Запад','Ja':'Лямбда (J)','Jb':'Лямбда (J)','Na':'Икс (N)','Nb':'Икс (N)','Y':'диагональные углы'};
+const rotv=(v,a,s)=>{const[x,y,z]=v;return a=='x'?(s>0?[x,-z,y]:[x,z,-y]):a=='y'?(s>0?[z,y,-x]:[-z,y,x]):(s>0?[-y,x,z]:[y,-x,z])};
+function caseLS(alg){const L=[];for(let x=-1;x<2;x++)for(let y=-1;y<2;y++)for(let z=-1;z<2;z++)[[x,'x'],[y,'y'],[z,'z']].forEach(([v,a])=>{if(v){const n=[0,0,0];n['xyz'.indexOf(a)]=v;L.push({p:[x,y,z],n,c:a+(v<0?'_1':'1')})}});
+expand(alg).reverse().map(inv).forEach(t=>{const m=t.match(/^([A-Za-z])(2|')?$/),d=MV[m[1]],k=m[2]=='2'?2:m[2]=="'"?-1:1,a=d[2]*k,sg=Math.sign(a),ai='xyz'.indexOf(d[0]);L.forEach(e=>{if(d[1](e.p[ai]))for(let i=0;i<Math.abs(a);i++){e.p=rotv(e.p,d[0],sg);e.n=rotv(e.n,d[0],sg)}})});return L}
+function thumbTop(L){const z=14,o=6;let h='';L.forEach(e=>{const c=COL[e.c],x=(e.p[0]+1)*z+o,y=(e.p[2]+1)*z+o;let r=null;
+if(e.n[1]==1)r=[x,y,z-1,z-1];else if(e.p[1]==1){if(e.n[2]==1)r=[x,o+3*z+1,z-1,4];else if(e.n[2]==-1)r=[x,o-5,z-1,4];else if(e.n[0]==1)r=[o+3*z+1,y,4,z-1];else if(e.n[0]==-1)r=[o-5,y,4,z-1]}
+if(r)h+=`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" rx="1.5" fill="${c}"/>`});return `<svg viewBox="0 0 54 54" width="60" height="60">${h}</svg>`}
+function thumbIso(L){const P=v=>[(v[0]-v[2])*.866,-v[1]+(v[0]+v[2])*.5];let h='';L.forEach(e=>{const n=e.n;if(n[0]<0||n[1]<0||n[2]<0)return;const c=e.p.map((v,i)=>v+n[i]*.5),t=[0,1,2].filter(i=>!n[i]);
+const pts=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([i,j])=>{const q=c.slice();q[t[0]]+=i*.44;q[t[1]]+=j*.44;return P(q).map(v=>(v*10.5+34).toFixed(1)).join(',')}).join(' ');
+h+=`<polygon points="${pts}" fill="${COL[e.c]}" stroke="#111" stroke-width=".6"/>`});return `<svg viewBox="0 0 68 68" width="64" height="64">${h}</svg>`}
+const thumb=a=>{const L=caseLS(a);return tab=='F2L'?thumbIso(L):thumbTop(L)};
 const TY={F:'R',R:'B',B:'L',L:'F',f:'r',r:'b',b:'l',l:'f'};
 const ym=(t,k)=>{let c=t[0];for(let i=0;i<k;i++)c=TY[c]||c;return c+t.slice(1)};
 function expand(a){let k=0,o=[];a.split(/\s+/).flatMap(t=>t=='d'?["y'",'U']:t=="d'"?["U'",'y']:[t]).forEach(t=>{if(t[0]=='y'){k=(k+(t=='y'?1:t=="y'"?3:2))%4}else o.push(ym(t,k))});return o}
 const inv=t=>t.endsWith('2')?t:t.endsWith("'")?t.slice(0,-1):t+"'";
 function desc(t){const k=t.slice(1),b=t[0];const dir=k=='2'?'на 180°':k=="'"?'против часовой':'по часовой';
 return `<b>${t}</b> — ${NM[b]}, ${dir}${k=='2'?'':' (если смотреть на эту грань)'}`}
+let er=0,hn=0,tr=false,ti=0,half=null,t0=0,hide=false,tb=false;
 let toks=[],idx=0,playing=false,busy=false,run=0;
 const $=id=>document.getElementById(id);
-function paint(cur){$('alg').innerHTML=toks.map((t,i)=>`<span class="${i==cur?'c':i<idx?'d':''}">${t}</span>`).join(' ')}
+function paint(cur){$('alg').innerHTML=toks.map((t,i)=>`<span class="${i==cur?'c':i<idx?'d':''}">${tr&&idx<toks.length&&i>=idx?'•':t}</span>`).join(' ')}
 function load(name,alg){playing=false;run++;busy=false;toks=expand(alg);build();toks.slice().reverse().forEach(t=>mv(inv(t),false));idx=0;
-$('title').textContent=name+(toks.join(' ')!=alg?' — '+alg+' (на кубике показано с учётом поворотов)':'');$('info').textContent='Нажмите ▶ — куб покажет, какие слои крутить';$('bP').textContent='▶';paint(-1)}
-async function step(){if(idx>=toks.length||busy)return;busy=true;const my=run,t=toks[idx];paint(idx);$('info').innerHTML=desc(t);await mv(t,true);if(my!=run)return;idx++;busy=false;paint(-1);if(idx>=toks.length)$('info').textContent='Готово! Куб собран.'}
-async function back(){if(idx<1||busy)return;playing=false;$('bP').textContent='▶';busy=true;const my=run;idx--;paint(-1);$('info').innerHTML='Откат: '+desc(inv(toks[idx]));await mv(inv(toks[idx]),true);if(my!=run)return;busy=false}
-async function play(){if(!toks.length)return;if(playing){playing=false;$('bP').textContent='▶';return}
+$('title').textContent=name+(toks.join(' ')!=alg&&!tr?' — '+alg+' (на кубике показано с учётом поворотов)':'');$('info').textContent='Нажмите ▶ — куб покажет, какие слои крутить';$('bP').textContent='▶';er=0;hn=0;ti=0;half=null;t0=0;paint(tr?0:-1);if(tr)prompt();if(hide)$('title').textContent='❓ Случайный случай — определите и выполните'}
+async function step(){if(tr)setTrain(false);if(idx>=toks.length||busy)return;busy=true;const my=run,t=toks[idx];paint(idx);$('info').innerHTML=desc(t);await mv(t,true);if(my!=run)return;idx++;busy=false;paint(-1);if(idx>=toks.length)$('info').textContent='Готово! Куб собран.'}
+async function back(){if(tr)setTrain(false);if(idx<1||busy)return;playing=false;$('bP').textContent='▶';busy=true;const my=run;idx--;paint(-1);$('info').innerHTML='Откат: '+desc(inv(toks[idx]));await mv(inv(toks[idx]),true);if(my!=run)return;busy=false}
+async function play(){if(tr)setTrain(false);if(!toks.length)return;if(playing){playing=false;$('bP').textContent='▶';return}
 if(idx>=toks.length){const c=cur;load(c[0],c[1])}
 playing=true;$('bP').textContent='⏸';const my=run;
 while(playing&&my==run&&idx<toks.length){await step();await new Promise(r=>setTimeout(r,180/speed))}
 if(my==run){playing=false;$('bP').textContent='▶'}}
+const LB={'Крест':'1 Крест','F2L':'2 F2L','OLL':'3 OLL','PLL':'4 PLL','Комбинации':'⚡ Комбинации'};
+const STG={
+'Крест':{w:'<b>Цель:</b> белый крест внизу: боковой цвет каждого белого ребра совпадает с центром. Готовых алгоритмов нет — планируйте крест заранее (до 8 ходов) и решайте по месту: подведите ребро верхним слоем к своему месту и вставьте поворотом грани (например F2).',r:[],n:'Крест собран → переходите к <b>F2L</b>.'},
+'F2L':{w:'<b>Цель:</b> собрать пары «белый угол + ребро» и вставить их в слоты, не ломая крест. Для каждой пары: 1) найдите белый угол, 2) найдите его ребро (по боковым цветам угла), 3) соберите их вместе в верхнем слое, 4) найдите свой случай среди 41 ниже, сравнив картинку с кубиком. Если застряли — выбейте угол из слота «сексуальным ходом» и пробуйте снова.',r:[['Пара уже собрана и стоит над слотом — просто вставить','F2L 1',"U R U' R'"],['Угол сидит в слоте, а ребро наверху — выбить угол и собрать заново','Сексуальный ход',"R U R' U'"]],n:'Все 4 пары вставлены (два слоя собраны, сверху жёлтая грань) → переходите к <b>OLL</b>.'},
+'OLL':{w:'<b>Цель:</b> сделать всю верхнюю грань жёлтой, не заботясь о порядке боковых цветов. <b>Новичок (2-look):</b> шаг 1 — жёлтый крест по форме жёлтых рёбер, шаг 2 — жёлтые углы. <b>Продвинутый (1-look):</b> сразу найти свой случай из 57 ниже.',r:[['Шаг 1 · Точка (жёлтых рёбер нет)','Крест: точка',"F R U R' U' F' f R U R' U' f'"],['Шаг 1 · Уголок из двух рёбер — уголок сзади слева','Крест: уголок',"f R U R' U' f'"],['Шаг 1 · Линия — положите горизонтально','Крест: линия',"F R U R' U' F'"],['Шаг 2 · Один жёлтый угол — поставьте его спереди слева','Зайчик (Sune)',"R U R' U R U2 R'"],['Шаг 2 · Один жёлтый угол — поставьте его спереди справа','Анти-зайчик',"R U2 R' U' R U' R'"],['Шаг 2 · Два жёлтых угла по диагонали (бант)','L (бант)',"F' r U R' U' r' F R"],['Шаг 2 · Два соседних жёлтых угла — T или U, сравните по картинке','T',"r U R' U' r' F R F'"],['Шаг 2 · Ни одного жёлтого угла — H или Pi, сравните по картинке','H',"R U2 R' U' R U R' U' R U' R'"]],n:'Верх полностью жёлтый → переходите к <b>PLL</b>.'},
+'Комбинации':{w:'Короткие «триггеры» — кирпичики, из которых собраны почти все алгоритмы. Выберите комбинацию ниже, посмотрите на кубике и повторите её сама кнопкой ✋.',r:[],n:'Выучили триггеры → возвращайтесь к <b>F2L</b> и <b>OLL</b>.'},
+'PLL':{w:'<b>Цель:</b> переставить детали последнего слоя. <b>Новичок (2-look):</b> шаг 1 — углы, шаг 2 — рёбра. <b>Продвинутый (1-look):</b> по «фарам» и цветам боков выберите один из 21 случая ниже. «Фары» — два соседних угла одного цвета на одной стороне.',r:[['Шаг 1 · Есть фары — поставьте их сзади (Aa; если не вышло — Ab)','Aa',"R' F R' B2 R F' R' B2 R2"],['Шаг 1 · Фар нет (углы по диагонали)','Y',"F R U' R' U' R U R' F' R U R' U' R' F R F'"],['Шаг 2 · Три ребра по кругу','Ua',"R U' R U R U R U' R' U' R2"],['Шаг 2 · Три ребра по кругу в другую сторону','Ub',"R2 U R U R' U' R' U' R' U R'"],['Шаг 2 · Два противоположных ребра меняются местами','H',"M2 U M2 U2 M2 U M2"],['Шаг 2 · Два соседних ребра меняются местами','Z',"M' U M2 U M2 U M' U2 M2"]],n:'Подкрутите верх (U) до совпадения цветов — <b>куб собран!</b> Проверьте себя во вкладке «Практика».'}};
+function guide(){const g=STG[tab];$('gd').innerHTML='<p>'+g.w+'</p>'+(g.r.length?'<p><b>Варианты на кубике — нажмите, чтобы увидеть и повторить:</b></p><div class="gr"></div>':'')+'<p>➡ '+g.n+'</p>';
+const d=$('gd').querySelector('.gr');g.r.forEach(([c,n,a])=>{const b=document.createElement('button');b.innerHTML=thumb(a)+'<span>'+c+' → <b>'+n+'</b></span>';b.onclick=()=>{[...$('chips').children].forEach(x=>x.classList.remove('on'));cur=[n,a];hide=false;load(n,a)};d.appendChild(b)})}
 let cur=null,tab=Object.keys(D)[0];
-function chips(){$('chips').innerHTML='';D[tab].forEach(s=>{const[n,a]=s.split('|'),b=document.createElement('button');b.textContent=n;
-b.onclick=()=>{[...$('chips').children].forEach(x=>x.classList.remove('on'));b.classList.add('on');cur=[n,a];load(n,a)};$('chips').appendChild(b)})}
-Object.keys(D).forEach(k=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>{tab=k;[...$('tabs').children].forEach(x=>x.classList.toggle('on',x==b));chips()};if(k==tab)b.classList.add('on');$('tabs').appendChild(b)});
-chips();$('chips').children[0].click();
+function chips(){$('chips').innerHTML='';D[tab].forEach(s=>{const[n,a]=s.split('|'),b=document.createElement('button');b.className='cs';
+b.innerHTML=(tab=='Комбинации'?'':thumb(a))+'<b>'+n+'</b><small>'+(tab=='Комбинации'?a:NICK[n]||'')+'</small>';
+b.onclick=()=>{[...$('chips').children].forEach(x=>x.classList.remove('on'));b.classList.add('on');cur=[n,a];hide=false;load(n,a)};$('chips').appendChild(b)})}
+Object.keys(D).forEach(k=>{const b=document.createElement('button');b.textContent=LB[k]||k;b.onclick=()=>{tab=k;[...$('tabs').children].forEach(x=>x.classList.toggle('on',x==b));chips();guide()};if(k==tab)b.classList.add('on');$('tabs').appendChild(b)});
+chips();guide();build();
 $('bP').onclick=play;$('bF').onclick=()=>{playing=false;$('bP').textContent='▶';step()};$('bB').onclick=back;
 $('bR').onclick=()=>{if(cur)load(cur[0],cur[1])};$('sp').onchange=e=>speed=+e.target.value;
 
@@ -137,11 +165,23 @@ function st(){const M={};cubies.forEach(g=>{const p=g.position;g.children.slice(
 function ident(seg,db){const h=norm(seg).join(' '),f=[];db.forEach(e=>{const[n,a]=e.split('|'),t=expand(a);for(let k=0;k<4;k++){if(hasT(h,t.map(x=>ym(x,k)).join(' '))){f.push(n);break}}});return f}
 let hist=[],scr=[],q=Promise.resolve(),mode='alg',fin=false;
 const PG=[['R','U','F','L','D','B'],['r','u','f','l','d','b'],['M','E','S']];
-PG.forEach(g=>{g.concat(g.map(x=>x+"'")).forEach(t=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>pm(t);$('pad').appendChild(b)})});
+const mkPad=(el,fn)=>PG.forEach(g=>{g.concat(g.map(x=>x+"'")).forEach(t=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>fn(t);el.appendChild(b)})});
+mkPad($('pad'),t=>pm(t));mkPad($('pad2'),t=>tp(t));
+function prompt(){$('info').innerHTML='🧠 Выполните комбинацию по памяти кнопками ниже. Точки • — ходы, которые ещё предстоит вспомнить; верные открываются. Застряли — 💡.'}
+function setTrain(v){tr=v;$('pad2').hidden=!v;$('bT').classList.toggle('on',v);if(v){if(cur){run++;playing=false;$('bP').textContent='▶';load(cur[0],cur[1])}else{tr=false;$('pad2').hidden=true;$('bT').classList.remove('on');$('info').textContent='Сначала выберите случай'}}else paint(-1)}
+async function tp(t){if(!tr||tb||ti>=toks.length)return;const e=toks[ti],two=e.endsWith('2'),ok=two?(t[0]==e[0]&&(!half||half==t)):t==e;
+if(!ok){er++;$('info').innerHTML='❌ Не тот ход (<b>'+t+'</b>). Подумайте ещё или нажмите 💡 Подсказка.';return}
+tb=true;if(!t0)t0=performance.now();await mv(t,true);tb=false;
+if(two&&!half){half=t;$('info').innerHTML='✔ Верно, это поворот на 180° — повторите ход ещё раз';return}
+half=null;ti++;idx=ti;
+if(ti>=toks.length){paint(-1);const sec=((performance.now()-t0)/1000).toFixed(1);hide=false;if(cur)$('title').textContent=cur[0]+(NICK[cur[0]]?' · '+NICK[cur[0]]:'');$('info').innerHTML='🎉 Готово по памяти! '+toks.length+' ходов за '+sec+' с, ошибок: '+er+', подсказок: '+hn+'. Нажмите 🎲 для следующего случая.'}
+else{paint(ti);$('info').innerHTML='✔ Верно, ход '+ti+' из '+toks.length}}
+function rnd(){const l=D[tab].length?D[tab]:D.OLL,[n,a]=l[Math.random()*l.length|0].split('|');[...$('chips').children].forEach(x=>x.classList.remove('on'));cur=[n,a];hide=true;tr=false;setTrain(true)}
+$('bH').onclick=()=>{if(tr&&ti<toks.length){hn++;$('info').innerHTML='💡 Следующий ход: '+desc(toks[ti])}};$('bT').onclick=()=>{hide=false;setTrain(!tr)};$('bQ').onclick=rnd;
 function pm(t){if(!scr.length||fin)return;hist.push(t);$('pn').textContent='Ходов: '+hist.length;q=q.then(()=>mv(t,true)).then(()=>{if(!fin&&an(st()).s)an2()})}
 function scramble(){run++;playing=false;q=Promise.resolve();fin=false;hist=[];scr=[];build();let l='';while(scr.length<22){const f='RLUDFB'[Math.random()*6|0];if(f==l)continue;l=f;scr.push(f+['',"'",'2'][Math.random()*3|0])}scr.forEach(t=>mv(t,false));$('res').innerHTML='';$('pn').textContent='Ход: 0. Крутите кнопками ниже.'}
-function setMode(m){mode=m;run++;playing=false;$('mA').classList.toggle('on',m=='alg');$('mP').classList.toggle('on',m=='pr');['At','Ab'].forEach(i=>$(i).hidden=m!='alg');$('Pz').hidden=m!='pr';
-if(m=='pr'){speed=3;scramble()}else{speed=+$('sp').value;if(cur)load(cur[0],cur[1])}}
+function setMode(m){if(tr)setTrain(false);mode=m;run++;playing=false;$('mA').classList.toggle('on',m=='alg');$('mP').classList.toggle('on',m=='pr');['At','Ab'].forEach(i=>$(i).hidden=m!='alg');$('Pz').hidden=m!='pr';
+if(m=='pr'){speed=3;scramble()}else{speed=+$('sp').value;if(cur)load(cur[0],cur[1]);else{build();$('title').textContent='';$('alg').innerHTML='';$('info').textContent='Выберите алгоритм'}}}
 async function an2(){await q;fin=true;build();scr.forEach(t=>mv(t,false));let iC=0,iF=0,iO=0,iS=0,pm_=0;
 hist.forEach((t,i)=>{mv(t,false);const a=an(st());pm_=Math.max(pm_,a.p);if(!iC&&a.c)iC=i+1;if(iC&&!iF&&a.c&&a.p==4)iF=i+1;if(iF&&!iO&&a.o&&a.c&&a.p==4)iO=i+1;if(iO&&!iS&&a.s)iS=i+1});
 const oN=iF&&iO?ident(hist.slice(iF,iO),D.OLL.concat(D.OLL)):[],pN=iO&&iS?ident(hist.slice(iO,iS),D.PLL):[];
@@ -155,8 +195,23 @@ row('F2L',sc[1],35,iF?fm+' ходов (хорошо ≤ 32)':'пар собра�
 row('OLL',sc[2],20,iO?om+' ходов; '+(oN.length?'распознан: '+oN.join(', '):'алгоритм из базы не найден — возможно 2-look или своя вариация'):'не достигнут')+
 row('PLL',sc[3],20,iS?pl+' ходов; '+(pN.length?'распознан: '+pN.join(', '):'алгоритм из базы не найден'):'не достигнут')+'</div>'}
 $('mA').onclick=()=>setMode('alg');$('mP').onclick=()=>setMode('pr');$('pS').onclick=scramble;$('pC').onclick=()=>{if(scr.length&&!fin&&hist.length)an2()};
-let dr=null;ren.domElement.onpointerdown=e=>{dr=[e.clientX,e.clientY];ren.domElement.setPointerCapture(e.pointerId)};
-ren.domElement.onpointermove=e=>{if(!dr)return;root.rotation.y+=(e.clientX-dr[0])*.01;root.rotation.x=Math.max(-1.4,Math.min(1.4,root.rotation.x+(e.clientY-dr[1])*.01));dr=[e.clientX,e.clientY]};
-ren.domElement.onpointerup=()=>dr=null;
+const rc=new THREE.Raycaster(),v2=new THREE.Vector2();let gs=null,vm=false;
+const gOK=()=>!vm&&((mode=='pr'&&scr.length&&!fin)||(tr&&mode=='alg'));
+const LT={x:{1:['R',-1],0:['M',1],'-1':['L',1]},y:{1:['U',-1],0:['E',1],'-1':['D',1]},z:{1:['F',-1],0:['S',-1],'-1':['B',1]}};
+function pick(e){const r=ren.domElement.getBoundingClientRect();v2.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);rc.setFromCamera(v2,cam);const h=rc.intersectObjects(cubies,true)[0];if(!h||!h.face)return null;
+const n=h.face.normal.clone().transformDirection(h.object.matrixWorld).applyQuaternion(root.quaternion.clone().invert());let g=h.object;while(g.parent&&g.parent!==root)g=g.parent;
+const a=[Math.abs(n.x),Math.abs(n.y),Math.abs(n.z)],ai=a.indexOf(Math.max(...a));return{g,ai,sg:Math.sign(n.getComponent(ai))}}
+function gest(e){const dx=e.clientX-gs.x,dy=e.clientY-gs.y;if(gs.done||Math.hypot(dx,dy)<14)return;gs.done=true;
+const cw=ren.domElement.getBoundingClientRect(),pj=w=>{const v=w.clone().project(cam);return[v.x*cw.width/2,-v.y*cw.height/2]};
+const p0=new THREE.Vector3();gs.g.getWorldPosition(p0);const s0=pj(p0);let best=null;
+[0,1,2].filter(i=>i!=gs.ai).forEach(i=>{const d=new THREE.Vector3();d.setComponent(i,1);d.applyQuaternion(root.quaternion);const s1=pj(p0.clone().add(d)),vx=s1[0]-s0[0],vy=s1[1]-s0[1],l=Math.hypot(vx,vy)||1,dot=(vx*dx+vy*dy)/l;if(!best||Math.abs(dot)>Math.abs(best.dot))best={i,dot}});
+const ti=best.i,ts=Math.sign(best.dot),ri=3-gs.ai-ti,pf=gs.g.position.clone();pf.setComponent(gs.ai,pf.getComponent(gs.ai)+gs.sg*.5);
+const r=new THREE.Vector3();r.setComponent(ri,1);const sgn=Math.sign(r.cross(pf).getComponent(ti)*ts),ax='xyz'[ri],l=Math.round(gs.g.position.getComponent(ri)),[L,ds]=LT[ax][l],tok=L+(sgn==ds?'':"'");
+if(mode=='pr')pm(tok);else if(tr)tp(tok)}
+addEventListener('keydown',e=>{if(e.target.tagName=='SELECT'||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toUpperCase();if(k.length!=1||!'RLUDFBMES'.includes(k))return;const t=k+(e.shiftKey?"'":'');if(mode=='pr')pm(t);else if(tr)tp(t)});
+$('bV').onclick=()=>{vm=!vm;$('bV').textContent=vm?'🔄 Жесты: вращать вид':'✋ Жесты: крутить слои'};
+let dr=null;ren.domElement.onpointerdown=e=>{ren.domElement.setPointerCapture(e.pointerId);const p=gOK()?pick(e):null;if(p){gs={...p,x:e.clientX,y:e.clientY,done:false};dr=null}else{gs=null;dr=[e.clientX,e.clientY]}};
+ren.domElement.onpointermove=e=>{if(gs){gest(e);return}if(!dr)return;root.rotation.y+=(e.clientX-dr[0])*.01;root.rotation.x=Math.max(-1.4,Math.min(1.4,root.rotation.x+(e.clientY-dr[1])*.01));dr=[e.clientX,e.clientY]};
+ren.domElement.onpointerup=()=>{dr=null;gs=null};
 (function loop(){ren.render(sc,cam);requestAnimationFrame(loop)})();
 </script></body></html>
